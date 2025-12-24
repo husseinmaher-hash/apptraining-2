@@ -3,39 +3,62 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # This triggers the workflow on every push to the main branch
+      - main
   pull_request:
     branches:
-      - main  # This triggers the workflow on PRs to the main branch
+      - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v2
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # Set up Docker Buildx
+      # 2. Set up Docker Buildx (for building multi-arch images)
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
-      # Log in to DockerHub
+      # 3. Log in to DockerHub
       - name: Log in to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}  # Use your GitHub secret for DockerHub username
-          password: ${{ secrets.DOCKER_PASSWORD }}  # Use your GitHub secret for DockerHub password
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Build and push the Docker images
-      - name: Build and push Docker images
+      # 4. Build Docker images
+      - name: Build Docker images
         run: |
-          docker-compose -f docker-compose.yml build  # Build the Docker images
-          docker-compose -f docker-compose.yml up -d  # Start the containers in detached mode
+          docker-compose -f docker-compose.yml build
 
-      # Optional: Run tests (if you have tests configured)
-      - name: Run tests
+      # 5. (Optional) Push Docker images to DockerHub
+      # Uncomment and update image names if you want to push images
+      # - name: Push Docker images
+      #   run: |
+      #     docker-compose -f docker-compose.yml push
+
+      # 6. Start containers for testing
+      - name: Start containers
         run: |
-          # Example: Run your tests (this is just a placeholder; modify based on your test setup)
-          npm test  # Replace with your test command
+          docker-compose -f docker-compose.yml up -d
+
+      # 7. Run tests (replace with your real test commands)
+      - name: Run backend tests
+        working-directory: ./backend
+        run: |
+          npm install
+          npm test
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm test
+
+      # 8. Stop and remove containers
+      - name: Tear down containers
+        run: |
+          docker-compose -f docker-compose.yml down
+
