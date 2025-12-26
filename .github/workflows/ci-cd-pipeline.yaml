@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout source code
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -29,7 +29,7 @@ jobs:
       - name: Start services
         run: docker compose up -d
 
-      # 5️⃣ Wait for database (safety)
+      # 5️⃣ Wait for database to be ready
       - name: Wait for PostgreSQL
         run: sleep 15
 
