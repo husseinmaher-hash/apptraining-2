@@ -39,7 +39,7 @@ jobs:
 
       # 7️⃣ Run frontend tests
       - name: Run frontend tests
-        run: docker compose exec frontend npm test
+        run: docker compose exec frontend npm test -- --watchAll=false
 
       # 8️⃣ Stop and remove containers
       - name: Stop services
