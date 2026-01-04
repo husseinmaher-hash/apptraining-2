@@ -26,6 +26,12 @@ jobs:
       - name: Wait for PostgreSQL
         run: sleep 15
 
+      - name: Run backend tests
+        run: docker compose exec backend npm test
+
+      - name: Run frontend tests
+        run: docker compose exec frontend npm test -- --watchAll=false --passWithNoTests
+
       - name: Stop services
         if: always()
         run: docker compose down
